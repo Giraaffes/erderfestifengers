@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Er der fest i Fengers?</title>
+		<link rel="icon" type="image/png" href="favicon.png">
+
+		<style>
+			body {
+				background-color: #000000;
+			}
+
+			body > * {
+				text-align: center;
+				margin-bottom: 0;
+			}
+
+			h1 {
+				font-family: constantia,georgia,serif;
+				margin-top: 6rem;
+				font-size: 36pt;
+				color: #ccc;
+			}
+
+			#answer {
+				font-family: candara,verdana,sans-serif;
+				font-size: 48pt;
+				font-weight: 600;
+				margin-top: 7rem;
+			}
+
+			#answer.ja {
+				color: #66bc46;
+			}
+
+			#answer.nej {
+				color: #f63a2d;
+			}
+
+			#weekend {
+				font-family: constantia,georgia,serif;
+				font-size: 16pt;
+				font-weight: 500;
+				margin-top: 7rem;
+				color: #ddd;
+			}
+		</style>
+	</head>
+
+	<body>
+		<h1>Er der fest i Fengers?</h1>
+		<p id="answer"></p>
+		<!--<p id="weekend" style="display: none;">( Selvfølgelig ikke, det er en hverdag! )</p>-->
+
+		<script>
+			async function main() {
+				const answerEl = document.getElementById("answer");
+
+				try {
+					// Append timestamp parameter to bypass browser/CDN cache on static assets
+					const response = await fetch(`schedule.json?v=${Date.now()}`);
+					
+					if (!response.ok) {
+						throw new Error(`HTTP error! Status: ${response.status}`);
+					}
+
+					const data = await response.json();
+					
+					const now = Date.now();
+					const isYes = Array.isArray(data.events) && data.events.some(event => now >= event.start && now <= event.end);
+
+					answerEl.innerText = isYes ? "Ja" : "Nej";
+					answerEl.classList.remove("ja", "nej");
+					answerEl.classList.add(isYes ? "ja" : "nej");
+
+				} catch (err) {
+					console.error("Failed to check schedule:", err);
+					
+					answerEl.classList.remove("ja", "nej");
+					answerEl.innerText = "Fejl...";
+					answerEl.classList.add("nej");
+				}
+			}
+
+			main();
+		</script>
+	</body>
+</html>
